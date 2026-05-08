@@ -1,18 +1,17 @@
 import { columns, DashboardColumns } from "./columns"
 import { DataTable } from "./data-table"
+import { DashboardStats } from "./dashboard-stats"
 
 async function getData(): Promise<DashboardColumns[]> {
-  return [
+
+  const response = await fetch(
+    "http://localhost:8000/item",
     {
-      id: 1,
-      nama_barang: "Barang 1",
-      kategori: "Kategori 1",
-      stok: 10,
-      satuan: "Buah",
-      harga_jual: 10000,
-      aksi: "Edit",
-    },
-  ]
+      cache: "no-store",
+    }
+  )
+
+  return response.json()
 }
 
 export async function DashboardTable() {
@@ -20,7 +19,10 @@ export async function DashboardTable() {
 
   return (
     <div className="w-full">
+      <DashboardStats data={data} />
+      <div className="my-4 flex items-center gap-5">
       <DataTable columns={columns} data={data} />
+      </div>
     </div>
   )
 }
