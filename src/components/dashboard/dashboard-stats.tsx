@@ -5,76 +5,62 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-type Barang = {
-  id: number
-  item_name: string
-  category_name: string
-  stock_amount: number
-  unit: string
-  selling_price: number
+type DashboardStatsData = {
+  totalBarang: number
+  totalKategori: number
+  stokMenipis: number
+  stokHabis: number
 }
 
 interface DashboardStatsProps {
-  data: Barang[]
+  stats: DashboardStatsData
 }
 
 export function DashboardStats({
-  data,
+  stats,
 }: DashboardStatsProps) {
 
-  // TOTAL BARANG
-  const totalBarang = data.length
-
-  // TOTAL KATEGORI
-  const totalKategori = new Set(
-    data.map((item) => item.category_name)
-  ).size
-
-  // STOK MENIPIS
-  const stokMenipis = data.filter(
-    (item) => item.stock_amount > 0 && item.stock_amount <= 5
-  ).length
-
-  // STOK HABIS
-  const stokHabis = data.filter(
-    (item) => item.stock_amount === 0
-  ).length
-
-  const stats = [
+  const statsData = [
     {
       title: "Total Barang",
-      value: totalBarang,
+      value: stats.totalBarang,
     },
     {
       title: "Total Kategori",
-      value: totalKategori,
+      value: stats.totalKategori,
     },
     {
       title: "Stok Menipis",
-      value: stokMenipis,
+      value: stats.stokMenipis,
     },
     {
       title: "Stok Habis",
-      value: stokHabis,
+      value: stats.stokHabis,
     },
   ]
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 
-      {stats.map((stat) => (
+      {statsData.map((stat) => (
         <Card key={stat.title}>
+
           <CardHeader className="pb-2">
+
             <CardTitle className="text-sm font-medium text-muted-foreground">
               {stat.title}
             </CardTitle>
+
           </CardHeader>
 
           <CardContent>
+
             <div className="text-3xl font-bold">
               {stat.value}
             </div>
+
           </CardContent>
+
         </Card>
       ))}
 

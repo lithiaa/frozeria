@@ -2,6 +2,9 @@
 
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@/components/ui/button"
+import { EditBarangDialog } from "./edit-barang-dialog"
+import { DeleteBarangDialog } from "./delete-barang-dialog"
+import { DetailBarangDialog } from "./detail-barang-dialog"
 
 export type DashboardColumns = {
   id: number
@@ -59,25 +62,18 @@ export const columns: ColumnDef<DashboardColumns>[] = [
 
       return (
         <div className="flex gap-2">
-          <Button variant="outline"
-            size="sm"
-            onClick={() => console.log("Detail", data.id)}
-          >Detail</Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => console.log("Edit", data.id)}
-          >
-            Edit
-          </Button>
+          <DetailBarangDialog
+            item={data}
+          />
 
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => console.log("Delete", data.id)}
-          >
-            Delete
-          </Button>
+          <EditBarangDialog
+            item={data}
+          />
+
+          <DeleteBarangDialog
+            id={data.id}
+            item_name={data.item_name}
+          />
         </div>
       )
     },

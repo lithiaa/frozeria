@@ -4,12 +4,6 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  SortingState,
-  ColumnFiltersState,
-  PaginationState,
   useReactTable,
 } from "@tanstack/react-table"
 
@@ -65,19 +59,32 @@ export function DataTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
 
-  const [sorting, setSorting] = useState<SortingState>([])
-
-  const [columnFilters, setColumnFilters] =
-    useState<ColumnFiltersState>([])
-
-  const [pagination, setPagination] =
-    useState<PaginationState>({
-      pageIndex: 0,
-      pageSize: 5,
-    })
-
   const [categories, setCategories] =
     useState<Category[]>([])
+
+  const [page, setPage] =
+    useState(1)
+
+  const [limit] =
+    useState(5)
+
+  const [sortBy, setSortBy] =
+    useState("createdAt")
+
+  const [order, setOrder] =
+    useState<"asc" | "desc">("desc")
+
+  const [search, setSearch] =
+    useState("")
+
+  const [selectedCategory, setSelectedCategory] =
+    useState("")
+
+  const [tableData, setTableData] =
+    useState<TData[]>([])
+
+  const [totalData, setTotalData] =
+    useState(0)
 
   useEffect(() => {
     async function fetchCategories() {
@@ -88,7 +95,7 @@ export function DataTable<TData, TValue>({
 
         const data = await response.json()
 
-        setCategories(data)
+        setCategories(data.data || [])
 
       } catch (error) {
         console.error(error)
@@ -98,24 +105,43 @@ export function DataTable<TData, TValue>({
     fetchCategories()
   }, [])
 
+  async function fetchItems() {
+
+    try {
+
+      const response = await fetch(
+        `http://localhost:8000/item?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${search}&categoryId=${selectedCategory}`
+      )
+
+      const result =
+        await response.json()
+
+      setTableData(result.data || [])
+
+      setTotalData(result.total || 0)
+
+    } catch (error) {
+
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    fetchItems()
+  }, [
+    page,
+    limit,
+    sortBy,
+    order,
+    search,
+    selectedCategory,
+  ])
+
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
 
-    state: {
-      sorting,
-      columnFilters,
-      pagination,
-    },
-
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    onPaginationChange: setPagination,
-
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
   })
 
   return (
@@ -130,33 +156,24 @@ export function DataTable<TData, TValue>({
 
           <Input
             placeholder="Cari barang..."
-            value={
-              (table
-                .getColumn("item_name")
-                ?.getFilterValue() as string) ?? ""
-            }
-            onChange={(event) =>
-              table
-                .getColumn("item_name")
-                ?.setFilterValue(event.target.value)
-            }
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value)
+              setPage(1)
+            }}
             className="pl-9"
           />
         </div>
         <div className="flex items-center gap-2">
           {/* FILTER KATEGORI */}
           <Select
-            value={
-              (table
-                .getColumn("category_name")
-                ?.getFilterValue() as string) ?? ""
+            value={selectedCategory}
+            onValueChange={(value) => {
+              setSelectedCategory(
+                value === "all" ? "" : value
+              )
+              setPage(1)
             }
-            onValueChange={(value) =>
-              table
-                .getColumn("category_name")
-                ?.setFilterValue(
-                  value === "all" ? "" : value
-                )
             }
           >
             <SelectTrigger className="w-[200px]">
@@ -170,11 +187,11 @@ export function DataTable<TData, TValue>({
                 Semua Kategori
               </SelectItem>
 
-              {categories.map((category) => (
+              {categories?.map((category) => (
 
                 <SelectItem
                   key={category.id}
-                  value={category.category_name}
+                  value={category.id.toString()}
                 >
                   {category.category_name}
                 </SelectItem>
@@ -205,7 +222,17 @@ export function DataTable<TData, TValue>({
                     >
 
                       <button
-                        onClick={header.column.getToggleSortingHandler()}
+                        onClick={() => {
+                          const columnId = header.column.id
+
+                          if (sortBy === columnId) {
+                            setOrder(order === "asc" ? "desc" : "asc")
+                          }
+                          else {
+                            setSortBy(columnId)
+                            setOrder("asc")
+                          }
+                        }}
                         className="flex items-center gap-2 font-medium"
                       >
                         {header.isPlaceholder
@@ -215,10 +242,15 @@ export function DataTable<TData, TValue>({
                             header.getContext()
                           )}
 
-                        {{
-                          asc: <ArrowUp className="h-4 w-4" />,
-                          desc: <ArrowDown className="h-4 w-4" />,
-                        }[header.column.getIsSorted() as string] ?? <ArrowUpDown className="h-4 w-4" />}
+                        {sortBy === header.column.id ? (
+                          order === "asc" ? (
+                            <ArrowUp className="h-4 w-4" />
+                          ) : (
+                            <ArrowDown className="h-4 w-4" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="h-4 w-4" />
+                        )}
 
                       </button>
 
@@ -260,21 +292,19 @@ export function DataTable<TData, TValue>({
 
         </Table>
       </div>
-      {table.getFilteredRowModel().rows.length > 0 ? (
+      {tableData.length > 0 ? (
         <div className="flex items-center justify-end px-4 py-4">
 
           {/* INFO */}
           <div className="text-sm text-muted-foreground">
             Showing{" "}
-            {table.getState().pagination.pageIndex *
-              table.getState().pagination.pageSize + 1}
+            {(page - 1) * limit + 1}
             {" - "}
             {Math.min(
-              (table.getState().pagination.pageIndex + 1) *
-              table.getState().pagination.pageSize,
-              table.getFilteredRowModel().rows.length
+              page * limit,
+              totalData
             )}{" "}
-            of {table.getFilteredRowModel().rows.length} data
+            of {totalData} data
           </div>
 
           {/* PAGINATION */}
@@ -284,9 +314,13 @@ export function DataTable<TData, TValue>({
               {/* PREVIOUS */}
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => table.previousPage()}
+                  onClick={() => {
+                    if (page > 1) {
+                      setPage(page - 1)
+                    }
+                  }}
                   className={
-                    !table.getCanPreviousPage()
+                    page === 1
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }
@@ -295,15 +329,12 @@ export function DataTable<TData, TValue>({
 
               {/* PAGE NUMBER */}
               {Array.from(
-                { length: table.getPageCount() },
+                { length: Math.ceil(totalData / limit) },
                 (_, index) => (
                   <PaginationItem key={index}>
                     <PaginationLink
-                      isActive={
-                        table.getState().pagination.pageIndex ===
-                        index
-                      }
-                      onClick={() => table.setPageIndex(index)}
+                      isActive={page === index + 1}
+                      onClick={() => setPage(index + 1)}
                       className="cursor-pointer"
                     >
                       {index + 1}
@@ -315,9 +346,16 @@ export function DataTable<TData, TValue>({
               {/* NEXT */}
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => table.nextPage()}
+                  onClick={() => {
+                    if (
+                      page <
+                      Math.ceil(totalData / limit)
+                    ) {
+                      setPage(page + 1)
+                    }
+                  }}
                   className={
-                    !table.getCanNextPage()
+                    page >= Math.ceil(totalData / limit)
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }
