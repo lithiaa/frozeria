@@ -40,6 +40,7 @@ import { Textarea } from "../ui/textarea"
 
 import { useRouter } from "next/navigation"
 
+
 type Category = {
   id: number
   category_name: string
@@ -49,11 +50,11 @@ type Category = {
 }
 
 const formSchema = z.object({
-  item_name: z.string().min(1),
+  item_name: z.string().min(1, "Nama barang wajib diisi"),
 
-  categoryId: z.string().min(1),
+  categoryId: z.string().min(1, "Kategori wajib diisi"),
 
-  stock_amount: z.string().min(1),
+  stock_amount: z.string().min(1, "Jumlah stok wajib diisi"),
 
   minimum_stock: z.string().optional(),
 
@@ -61,7 +62,7 @@ const formSchema = z.object({
 
   purchase_price: z.string().optional(),
 
-  unit: z.string().min(1),
+  unit: z.string().min(1, "Satuan wajib diisi"),
 
   weight_size: z.string().optional(),
 
@@ -123,8 +124,7 @@ export function AddBarangDialog() {
 
         const data = await response.json()
 
-        setCategories(data)
-        console.log(data)
+        setCategories(data.data || [])
 
       } catch (error) {
 
@@ -368,128 +368,128 @@ export function AddBarangDialog() {
                   )}
                 />
 
-                {/* KATEGORI */}
-                <FormField
-                  control={form.control}
-                  name="categoryId"
-                  render={({ field }) => (
-                    <FormItem>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* KATEGORI */}
+                  <FormField
+                    control={form.control}
+                    name="categoryId"
+                    render={({ field }) => (
+                      <FormItem>
 
-                      <FormLabel>
-                        Kategori *
-                      </FormLabel>
+                        <FormLabel>
+                          Kategori *
+                        </FormLabel>
 
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+
+                          <FormControl>
+                            <SelectTrigger>
+
+                              <SelectValue
+                                placeholder={
+                                  loadingCategory
+                                    ? "Loading kategori..."
+                                    : "Pilih kategori"
+                                }
+                              />
+
+                            </SelectTrigger>
+                          </FormControl>
+
+                          <SelectContent>
+
+                            {categories.map((category) => (
+
+                              <SelectItem
+                                key={category.id}
+                                value={category.id.toString()}
+                              >
+                                {category.category_name}
+                              </SelectItem>
+
+                            ))}
+
+                          </SelectContent>
+
+                        </Select>
+
+                        <FormMessage />
+
+                      </FormItem>
+                    )}
+                  />
+                  {/* SATUAN */}
+                  <FormField
+                    control={form.control}
+                    name="unit"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Satuan *
+                        </FormLabel>
 
                         <FormControl>
-                          <SelectTrigger>
-
-                            <SelectValue
-                              placeholder={
-                                loadingCategory
-                                  ? "Loading kategori..."
-                                  : "Pilih kategori"
-                              }
-                            />
-
-                          </SelectTrigger>
+                          <Input
+                            placeholder="Contoh: pcs"
+                            {...field}
+                          />
                         </FormControl>
 
-                        <SelectContent>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* JUMLAH STOK */}
+                  <FormField
+                    control={form.control}
+                    name="stock_amount"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Jumlah Stok *
+                        </FormLabel>
 
-                          {categories.map((category) => (
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Masukkan jumlah stok"
+                            {...field}
+                          />
+                        </FormControl>
 
-                            <SelectItem
-                              key={category.id}
-                              value={category.id.toString()}
-                            >
-                              {category.category_name}
-                            </SelectItem>
-
-                          ))}
-
-                        </SelectContent>
-
-                      </Select>
-
-                      <FormMessage />
-
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="minimum_stock"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Stok Minimum
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="Masukkan stok minimum"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {/* SATUAN */}
-              <FormField
-                control={form.control}
-                name="unit"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Satuan *
-                    </FormLabel>
-
-                    <FormControl>
-                      <Input
-                        placeholder="Contoh: pcs"
-                        {...field}
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* JUMLAH STOK */}
-              <FormField
-                control={form.control}
-                name="stock_amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Jumlah Stok *
-                    </FormLabel>
-
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Masukkan jumlah stok"
-                        {...field}
-                      />
-                    </FormControl>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="minimum_stock"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Stok Minimum
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Masukkan stok minimum"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <FormField
                 control={form.control}
@@ -512,9 +512,6 @@ export function AddBarangDialog() {
                   </FormItem>
                 )}
               />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
               {/* HARGA BELI */}
               <FormField
                 control={form.control}
@@ -535,6 +532,9 @@ export function AddBarangDialog() {
                   </FormItem>
                 )}
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
 
               {/* UKURAN/BERAT */}
               <FormField
@@ -555,26 +555,26 @@ export function AddBarangDialog() {
                   </FormItem>
                 )}
               />
+              <FormField
+                control={form.control}
+                name="save_location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Lokasi Penyimpanan
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Contoh: Rak A1"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <FormField
-              control={form.control}
-              name="save_location"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
-                    Lokasi Penyimpanan
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Contoh: Rak A1"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             {/* DESKRIPSI */}
             <FormField
