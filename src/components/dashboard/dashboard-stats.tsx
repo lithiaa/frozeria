@@ -7,11 +7,11 @@ import {
 
 type Barang = {
   id: number
-  nama_barang: string
-  kategori: string
-  stok: number
-  satuan: string
-  harga_jual: number
+  item_name: string
+  category_name: string
+  stock_amount: number
+  unit: string
+  selling_price: number
 }
 
 interface DashboardStatsProps {
@@ -27,17 +27,17 @@ export function DashboardStats({
 
   // TOTAL KATEGORI
   const totalKategori = new Set(
-    data.map((item) => item.kategori)
+    data.map((item) => item.category_name)
   ).size
 
   // STOK MENIPIS
   const stokMenipis = data.filter(
-    (item) => item.stok > 0 && item.stok <= 5
+    (item) => item.stock_amount > 0 && item.stock_amount <= 5
   ).length
 
   // STOK HABIS
   const stokHabis = data.filter(
-    (item) => item.stok === 0
+    (item) => item.stock_amount === 0
   ).length
 
   const stats = [
