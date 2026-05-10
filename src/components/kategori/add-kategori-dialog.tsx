@@ -36,7 +36,6 @@ import { Textarea } from "@/components/ui/textarea"
 
 import { toast } from "sonner"
 
-import { useRouter } from "next/navigation"
 
 const formSchema = z.object({
   category_name: z
@@ -48,7 +47,6 @@ const formSchema = z.object({
 
 export function AddKategoriDialog() {
 
-  const router = useRouter()
 
   const [loading, setLoading] =
     useState(false)
@@ -101,11 +99,13 @@ export function AddKategoriDialog() {
         "Kategori berhasil ditambahkan"
       )
 
+      window.dispatchEvent(
+        new Event("categories:refresh")
+      )
+
       form.reset()
 
       setOpen(false)
-
-      router.refresh()
 
     } catch (error) {
 

@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import { SlidersHorizontal, Search } from "lucide-react"
 
@@ -105,10 +105,8 @@ export function DataTable<TData, TValue>({
     fetchCategories()
   }, [])
 
-  async function fetchItems() {
-
+  const fetchItems = useCallback(async () => {
     try {
-
       const response = await fetch(
         `http://localhost:8000/item?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${search}&categoryId=${selectedCategory}`
       )
@@ -121,13 +119,8 @@ export function DataTable<TData, TValue>({
       setTotalData(result.total || 0)
 
     } catch (error) {
-
       console.error(error)
     }
-  }
-
-  useEffect(() => {
-    fetchItems()
   }, [
     page,
     limit,
@@ -136,6 +129,28 @@ export function DataTable<TData, TValue>({
     search,
     selectedCategory,
   ])
+
+  useEffect(() => {
+    fetchItems()
+  }, [fetchItems])
+
+  useEffect(() => {
+    function handleRefresh() {
+      fetchItems()
+    }
+
+    window.addEventListener(
+      "items:refresh",
+      handleRefresh
+    )
+
+    return () => {
+      window.removeEventListener(
+        "items:refresh",
+        handleRefresh
+      )
+    }
+  }, [fetchItems])
 
   const table = useReactTable({
     data: tableData,
@@ -314,7 +329,9 @@ export function DataTable<TData, TValue>({
               {/* PREVIOUS */}
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => {
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault()
                     if (page > 1) {
                       setPage(page - 1)
                     }
@@ -334,7 +351,11 @@ export function DataTable<TData, TValue>({
                   <PaginationItem key={index}>
                     <PaginationLink
                       isActive={page === index + 1}
-                      onClick={() => setPage(index + 1)}
+                      href="#"
+                      onClick={(event) => {
+                        event.preventDefault()
+                        setPage(index + 1)
+                      }}
                       className="cursor-pointer"
                     >
                       {index + 1}
@@ -346,7 +367,9 @@ export function DataTable<TData, TValue>({
               {/* NEXT */}
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => {
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault()
                     if (
                       page <
                       Math.ceil(totalData / limit)

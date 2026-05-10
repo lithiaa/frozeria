@@ -2,7 +2,6 @@
 
 import { ChangeEvent, useEffect, useState } from "react"
 
-import { useRouter } from "next/navigation"
 
 import { useForm } from "react-hook-form"
 
@@ -93,7 +92,6 @@ const formSchema = z.object({
 })
 
 export function EditBarangDialog({ item }: Props) {
-    const router = useRouter()
 
     const [open, setOpen] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -297,9 +295,11 @@ export function EditBarangDialog({ item }: Props) {
 
             toast.success("Barang berhasil diupdate")
 
-            setOpen(false)
+            window.dispatchEvent(
+                new Event("items:refresh")
+            )
 
-            router.refresh()
+            setOpen(false)
 
         } catch (error) {
             console.error(error)

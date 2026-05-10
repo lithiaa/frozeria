@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 
-import { useRouter } from "next/navigation"
 
 import { useForm } from "react-hook-form"
 
@@ -56,7 +55,6 @@ export function EditKategoriDialog({
   category,
 }: Props) {
 
-  const router = useRouter()
 
   const [open, setOpen] = useState(false)
 
@@ -109,9 +107,11 @@ export function EditKategoriDialog({
         "Kategori berhasil diupdate"
       )
 
-      setOpen(false)
+      window.dispatchEvent(
+        new Event("categories:refresh")
+      )
 
-      router.refresh()
+      setOpen(false)
 
     } catch (error) {
 

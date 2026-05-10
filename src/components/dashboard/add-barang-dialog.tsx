@@ -38,7 +38,6 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "../ui/textarea"
 
-import { useRouter } from "next/navigation"
 
 
 type Category = {
@@ -91,7 +90,6 @@ export function AddBarangDialog() {
     },
   })
 
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const [imageFile, setImageFile] =
@@ -234,14 +232,16 @@ export function AddBarangDialog() {
 
       toast.success("Barang berhasil ditambahkan")
 
+      window.dispatchEvent(
+        new Event("items:refresh")
+      )
+
       form.reset()
 
       setImageFile(null)
       setImagePreviewUrl(null)
 
       setOpen(false)
-
-      router.refresh()
 
     } catch (error) {
       toast.error("Gagal menambahkan barang")

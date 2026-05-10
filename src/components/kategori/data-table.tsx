@@ -10,7 +10,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 import {
   Table,
@@ -85,39 +85,51 @@ export function DataTable<TData, TValue>({
   const [totalData, setTotalData] =
     useState(0)
 
-  useEffect(() => {
+  const fetchItems = useCallback(async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/categories?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${search}`
+      )
 
-    async function fetchItems() {
+      const result =
+        await response.json()
 
-      try {
+      setTableData(result.data || [])
 
-        const response = await fetch(
-          `http://localhost:8000/categories?page=${page}&limit=${limit}&sortBy=${sortBy}&order=${order}&search=${search}`
-        )
+      setTotalData(result.total)
 
-        const result =
-          await response.json()
-
-        setTableData(result.data || [])
-
-        setTotalData(result.total)
-
-      } catch (error) {
-
-        console.error(error)
-      }
+    } catch (error) {
+      console.error(error)
     }
-
-    fetchItems()
-
   }, [
     page,
     limit,
     sortBy,
     order,
     search,
-    selectedCategory,
   ])
+
+  useEffect(() => {
+    fetchItems()
+  }, [fetchItems])
+
+  useEffect(() => {
+    function handleRefresh() {
+      fetchItems()
+    }
+
+    window.addEventListener(
+      "categories:refresh",
+      handleRefresh
+    )
+
+    return () => {
+      window.removeEventListener(
+        "categories:refresh",
+        handleRefresh
+      )
+    }
+  }, [fetchItems])
 
   const table = useReactTable({
     data: tableData,
@@ -270,9 +282,15 @@ export function DataTable<TData, TValue>({
               {/* PREVIOUS */}
               <PaginationItem>
                 <PaginationPrevious
-                  onClick={() => setPage(page - 1)}
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    if (page > 1) {
+                      setPage(page - 1)
+                    }
+                  }}
                   className={
-                    !table.getCanPreviousPage()
+                    page === 1
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }
@@ -286,9 +304,11 @@ export function DataTable<TData, TValue>({
                   <PaginationItem key={index}>
                     <PaginationLink
                       isActive={page === index + 1}
-                      onClick={() =>
+                      href="#"
+                      onClick={(event) => {
+                        event.preventDefault()
                         setPage(index + 1)
-                      }
+                      }}
                       className="cursor-pointer"
                     >
                       {index + 1}
@@ -300,9 +320,18 @@ export function DataTable<TData, TValue>({
               {/* NEXT */}
               <PaginationItem>
                 <PaginationNext
-                  onClick={() => setPage(page + 1)}
+                  href="#"
+                  onClick={(event) => {
+                    event.preventDefault()
+                    if (
+                      page <
+                      Math.ceil(totalData / limit)
+                    ) {
+                      setPage(page + 1)
+                    }
+                  }}
                   className={
-                    !table.getCanNextPage()
+                    page >= Math.ceil(totalData / limit)
                       ? "pointer-events-none opacity-50"
                       : "cursor-pointer"
                   }

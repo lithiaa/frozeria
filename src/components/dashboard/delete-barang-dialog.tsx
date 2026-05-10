@@ -16,8 +16,6 @@ import { Button } from "@/components/ui/button"
 
 import { toast } from "sonner"
 
-import { useRouter } from "next/navigation"
-
 import { useState } from "react"
 
 type DeleteBarangDialogProps = {
@@ -29,7 +27,6 @@ export function DeleteBarangDialog({
 	id,
 	item_name,
 }: DeleteBarangDialogProps) {
-	const router = useRouter()
 
 	const [loading, setLoading] =
 		useState(false)
@@ -59,7 +56,9 @@ export function DeleteBarangDialog({
 				"Barang berhasil dihapus"
 			)
 
-			router.refresh()
+			window.dispatchEvent(
+				new Event("items:refresh")
+			)
 
 		} catch (error) {
 			console.error(error)

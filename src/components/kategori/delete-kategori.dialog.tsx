@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button"
 
 import { toast } from "sonner"
 
-import { useRouter } from "next/navigation"
 
 import { useState } from "react"
 
@@ -30,7 +29,6 @@ export function DeleteKategoriDialog({
   category_name,
 }: DeleteKategoriDialogProps) {
 
-  const router = useRouter()
 
   const [loading, setLoading] =
     useState(false)
@@ -62,7 +60,9 @@ export function DeleteKategoriDialog({
         "Kategori berhasil dihapus"
       )
 
-      router.refresh()
+      window.dispatchEvent(
+        new Event("categories:refresh")
+      )
 
     } catch (error) {
 
