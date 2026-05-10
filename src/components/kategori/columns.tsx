@@ -19,24 +19,36 @@ export const columns: ColumnDef<KategoriColumns>[] = [
     header: "ID",
     minSize: 50,
     maxSize: 100,
+    meta: {
+      sortable: true,
+    },
   },
   {
     accessorKey: "category_name",
     header: "Nama Kategori",
     minSize: 200,
     maxSize: 300,
+    meta: {
+      sortable: true,
+    },
   },
   {
     accessorKey: "itemCount",
     header: "Jumlah Barang",
     minSize: 150,
     maxSize: 150,
+    meta: {
+      sortable: true,
+    },
   },
   {
     accessorKey: "createdAt",
     header: "Dibuat Pada",
     minSize: 150,
     maxSize: 150,
+    meta: {
+      sortable: true,
+    },
   },
   {
     id: "aksi",

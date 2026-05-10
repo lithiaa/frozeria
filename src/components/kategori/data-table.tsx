@@ -5,7 +5,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   ColumnFiltersState,
   useReactTable,
 } from "@tanstack/react-table"
@@ -21,21 +20,11 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { Button } from "@/components/ui/button"
-
 import { Input } from "@/components/ui/input"
 
 import { Search } from "lucide-react"
 
 import { AddKategoriDialog } from "./add-kategori-dialog"
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 import {
   Pagination,
@@ -165,7 +154,8 @@ export function DataTable<TData, TValue>({
           />
         </div>
         <div className="flex items-center gap-2">
-          {/* BUTTON TAMBAH */}
+
+          {/* BUTTON TAMBAH BARANG */}
           <AddKategoriDialog />
         </div>
       </div>
@@ -177,6 +167,7 @@ export function DataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const sortable = header.column.columnDef.meta?.sortable
                   return (
                     <TableHead
                       key={header.id}
@@ -184,11 +175,11 @@ export function DataTable<TData, TValue>({
                         width: header.getSize(),
                       }}
                     >
-
-                      <button
-                        onClick={() => {
-                          const columnId =
-                            header.column.id
+                      {sortable ? (
+                        <button
+                          onClick={() => {
+                            const columnId =
+                              header.column.id
 
                           if (sortBy === columnId) {
                             setOrder(
@@ -221,6 +212,16 @@ export function DataTable<TData, TValue>({
                         )}
 
                       </button>
+                    ) : (
+                      <div className="font-medium">
+                      {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                      </div>
+                    )}
 
                     </TableHead>
                   )

@@ -20,7 +20,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
-import { Button } from "@/components/ui/button"
 import { AddBarangDialog } from "./add-barang-dialog"
 import { Input } from "@/components/ui/input"
 
@@ -85,7 +84,7 @@ export function DataTable<TData, TValue>({
 
   const [totalData, setTotalData] =
     useState(0)
-
+  
   useEffect(() => {
     async function fetchCategories() {
       try {
@@ -228,6 +227,7 @@ export function DataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const sortable = header.column.columnDef.meta?.sortable
                   return (
                     <TableHead
                       key={header.id}
@@ -236,39 +236,53 @@ export function DataTable<TData, TValue>({
                       }}
                     >
 
+                     {sortable ? (
                       <button
                         onClick={() => {
+
                           const columnId = header.column.id
 
                           if (sortBy === columnId) {
-                            setOrder(order === "asc" ? "desc" : "asc")
-                          }
-                          else {
-                            setSortBy(columnId)
-                            setOrder("asc")
-                          }
-                        }}
-                        className="flex items-center gap-2 font-medium"
-                      >
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                              setOrder( order === "asc" ? "desc" : "asc" )
+                            } else {
+                              setSortBy(columnId)
+                              setOrder("asc")
+                            }
+                          }}
+                          className="flex items-center gap-2 font-medium">
 
-                        {sortBy === header.column.id ? (
-                          order === "asc" ? (
-                            <ArrowUp className="h-4 w-4" />
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+
+                              {sortBy === header.column.id ? (
+                                order === "asc" ? (
+                                  <ArrowUp className="h-4 w-4" />
+                                ) : (
+                                  <ArrowDown className="h-4 w-4" />
+                                )
+                              ) : (
+                                <ArrowUpDown className="h-4 w-4" />
+                              )}
+
+                            </button>
+
                           ) : (
-                            <ArrowDown className="h-4 w-4" />
-                          )
-                        ) : (
-                          <ArrowUpDown className="h-4 w-4" />
-                        )}
 
-                      </button>
+                            <div className="font-medium">
 
+                              {header.isPlaceholder
+                                ? null
+                                : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+
+                            </div>
+                          )}
                     </TableHead>
                   )
                 })}
