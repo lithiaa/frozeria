@@ -4,7 +4,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 
-import { AppSidebar } from "@/components/dashboard/sidebar"
+import { AppSidebar } from "@/components/general/sidebar"
 
 import {
   Breadcrumb,
@@ -14,30 +14,38 @@ import {
 } from "@/components/ui/breadcrumb"
 
 import { KategoriTable } from "@/components/kategori/kategori-table"
+import { UserProfile } from "@/components/general/user-profile"
 
 export default function KategoriPage() {
   return (
     <SidebarProvider>
-          <div className="flex min-h-screen">
-            <AppSidebar />
-    
-            <SidebarInset>
-              <header className="flex items-center gap-2 border-b px-4 py-3">
-                <SidebarTrigger />
-    
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>Daftar Kategori</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
-              </header>
+      <div className="flex min-h-screen">
+        <AppSidebar />
 
-              <div className="flex w-full flex-col p-4">
-                <KategoriTable />
-              </div>
-            </SidebarInset>
+        <SidebarInset>
+          <header className="flex justify-between items-center gap-2 border-b px-4 py-3">
+            <div className="flex items-center gap-2 ">
+              <SidebarTrigger />
+
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Daftar Kategori</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+            <UserProfile
+              name="Muhammad Bagus Indrawan"
+              email="indraw910@gmail.com"
+            />
+          </header>
+
+          <div className="flex w-full flex-col p-4">
+            <KategoriTable />
           </div>
-        </SidebarProvider>
-  )}
+        </SidebarInset>
+      </div>
+    </SidebarProvider>
+  )
+}
